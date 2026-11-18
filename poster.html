@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The World in One Picture — Wednesday 18 November 2026</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1024px; height: 1024px; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: #e7ddc2;
+    color: #16233a;
+  }
+  .poster {
+    width: 1024px; height: 1024px;
+    padding: 20px 26px 16px;
+    display: flex; flex-direction: column;
+    background:
+      radial-gradient(1150px 620px at 50% -60px, #faf5e6 0%, #f3ecd7 55%, #ece1c6 100%);
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { text-align: center; border-bottom: 7px double #16233a; padding-bottom: 9px; }
+  .kicker {
+    font-size: 16px; font-weight: 800; letter-spacing: 8px; color: #b3352b;
+  }
+  .date {
+    margin-top: 3px;
+    font-size: 52px; font-weight: 900; letter-spacing: .5px; line-height: 1.04;
+    text-shadow: 0 2px 0 rgba(22,35,58,.14);
+  }
+  .date .red { color: #c22f24; }
+
+  /* ---------- hero (3D diorama) ---------- */
+  .hero {
+    margin-top: 12px;
+    border: 3px solid #16233a;
+    background: #081e30;
+    box-shadow: 0 16px 30px rgba(22,35,58,.38), 0 4px 0 rgba(22,35,58,.25);
+  }
+  .hero-art {
+    position: relative; height: 250px; overflow: hidden;
+    background: radial-gradient(900px 340px at 50% 118%, #175d7d 0%, #0d3a56 55%, #081e30 100%);
+  }
+  .hero-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .chip {
+    position: absolute; z-index: 3;
+    background: rgba(7,22,36,.85); color: #fff;
+    font-size: 13px; font-weight: 700; letter-spacing: 2.5px;
+    padding: 5px 10px 4px; border: 1px solid rgba(255,255,255,.45); border-radius: 3px;
+    box-shadow: 0 3px 8px rgba(0,0,0,.45);
+  }
+  .chip.hot { background: rgba(178,34,24,.88); border-color: rgba(255,255,255,.55); }
+  #chipIran { top: 4%; left: 57%; }
+  #chipKuwait { top: 30%; left: 20%; }
+  #chipBahrain { top: 58%; left: 24%; }
+  #chipHormuz { bottom: 4%; right: 3%; }
+  .hero-caption {
+    background: linear-gradient(#faf5e6, #f2ead3);
+    border-top: 3px solid #16233a;
+    padding: 9px 18px 11px;
+  }
+  .hero-headline { font-size: 45px; font-weight: 900; line-height: 1.02; letter-spacing: .2px; }
+  .hero-headline .red { color: #c22f24; }
+  .hero-sub { margin-top: 4px; font-size: 17.5px; line-height: 1.34; color: #333f4e; }
+
+  /* ---------- panels ---------- */
+  .row { display: grid; gap: 12px; margin-top: 11px; }
+  .row.r1 { grid-template-columns: 1fr 1fr 1fr; }
+  .row.r2 { grid-template-columns: 1fr 1fr; }
+  .panel {
+    background: linear-gradient(#fffdf7, #f8f0da);
+    border: 2.5px solid #16233a;
+    box-shadow: 7px 9px 0 rgba(22,35,58,.16), 0 10px 18px rgba(22,35,58,.12);
+    padding: 11px 14px 10px;
+    overflow: hidden;
+  }
+  .row.r1 .panel { height: 224px; }
+  .row.r2 .panel { height: 186px; }
+  .tag {
+    display: inline-block; color: #fff;
+    font-size: 12px; font-weight: 800; letter-spacing: 2px;
+    padding: 4px 9px 3px; border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(22,35,58,.25);
+  }
+  .panel h3 { font-size: 25px; font-weight: 900; line-height: 1.07; margin: 7px 0 5px; }
+  .row.r1 .panel h3 { font-size: 23px; }
+  .row.r1 .icon { width: 100px; height: 71px; }
+  .row.r2 .panel h3 { font-size: 26px; }
+  .panel p { font-size: 16px; line-height: 1.31; color: #37424f; }
+  .icon { float: right; margin: 2px 0 4px 10px; }
+
+  /* ---------- ticker ---------- */
+  .ticker {
+    margin-top: 11px;
+    background: linear-gradient(#1b2c47, #131f33);
+    color: #f5efdc;
+    border: 2.5px solid #0d1626;
+    box-shadow: 7px 9px 0 rgba(22,35,58,.16);
+    padding: 10px 16px;
+    font-size: 16.5px; font-weight: 700; line-height: 1.42; letter-spacing: .3px;
+  }
+  .ticker .also { color: #ffb54d; letter-spacing: 2px; }
+  .ticker .dot { color: #e0564b; }
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <header class="masthead">
+    <div class="kicker">THE WORLD IN ONE PICTURE</div>
+    <div class="date">WEDNESDAY <span class="red">18 NOVEMBER</span> 2026</div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-art" id="heroArt">
+      <canvas id="gl"></canvas>
+      <div class="chip" id="chipIran">IRAN</div>
+      <div class="chip hot" id="chipBahrain">BAHRAIN — U.S. BASE HIT</div>
+      <div class="chip" id="chipKuwait">KUWAIT</div>
+      <div class="chip" id="chipHormuz">STRAIT OF HORMUZ</div>
+    </div>
+    <div class="hero-caption">
+      <div class="hero-headline">IRAN <span class="red">STRIKES BACK</span></div>
+      <p class="hero-sub">Drones and missiles hit U.S. bases in Bahrain and Kuwait after U.S. strikes on
+      Qeshm Island; an MQ-9 drone is shot down near Hormuz as Saudi Arabia intercepts a missile bound for Riyadh.</p>
+    </div>
+  </section>
+
+  <div class="row r1">
+    <article class="panel">
+      <svg class="icon" width="112" height="80" viewBox="0 0 120 84">
+        <!-- three flags on isometric stands -->
+        <polygon points="24,66 38,73 24,80 10,73" fill="#8a6b3f"/>
+        <polygon points="60,62 74,69 60,76 46,69" fill="#8a6b3f"/>
+        <polygon points="96,66 110,73 96,80 82,73" fill="#8a6b3f"/>
+        <rect x="22.6" y="18" width="2.8" height="50" fill="#5a4632"/>
+        <rect x="58.6" y="14" width="2.8" height="50" fill="#5a4632"/>
+        <rect x="94.6" y="18" width="2.8" height="50" fill="#5a4632"/>
+        <!-- China flag -->
+        <polygon points="25.4,18 51,24 51,44 25.4,38" fill="#d43a2c"/>
+        <polygon points="31,24 33.2,28.6 38,29 34.4,32.2 35.6,36.8 31,34 26.4,36.8 27.6,32.2 24,29 28.8,28.6" fill="#ffd94d" transform="translate(2.5,-1) scale(.82)"/>
+        <!-- Russia flag -->
+        <polygon points="61.4,14 87,20 87,26.7 61.4,20.7" fill="#f2f2f2"/>
+        <polygon points="61.4,20.7 87,26.7 87,33.3 61.4,27.3" fill="#2e5fa3"/>
+        <polygon points="61.4,27.3 87,33.3 87,40 61.4,34" fill="#d43a2c"/>
+        <!-- US flag -->
+        <polygon points="97.4,18 119,22.5 119,25.8 97.4,21.3" fill="#d43a2c"/>
+        <polygon points="97.4,21.3 119,25.8 119,29.1 97.4,24.6" fill="#f5f0e6"/>
+        <polygon points="97.4,24.6 119,29.1 119,32.4 97.4,27.9" fill="#d43a2c"/>
+        <polygon points="97.4,27.9 119,32.4 119,35.7 97.4,31.2" fill="#f5f0e6"/>
+        <polygon points="97.4,31.2 119,35.7 119,39 97.4,34.5" fill="#d43a2c"/>
+        <polygon points="97.4,18 107,20 107,27.5 97.4,25.5" fill="#2e3a6e"/>
+      </svg>
+      <span class="tag" style="background:#b3352b">CHINA · APEC</span>
+      <h3>XI MEETS PUTIN IN SHENZHEN</h3>
+      <p>Xi pledges to fight protectionism; Putin attacks sanctions. First trilateral with Trump: Thursday.</p>
+    </article>
+
+    <article class="panel">
+      <svg class="icon" width="112" height="80" viewBox="0 0 120 84">
+        <!-- water -->
+        <polygon points="6,62 114,62 114,80 6,80" fill="#2e7fb8"/>
+        <polygon points="6,62 114,62 114,67 6,67" fill="#57a7d8"/>
+        <!-- bridge deck, iso -->
+        <polygon points="6,34 66,26 66,32 6,40" fill="#5b6b7a"/>
+        <polygon points="6,40 66,32 66,37 6,45" fill="#3d4a56"/>
+        <!-- towers -->
+        <polygon points="20,14 27,13 27,38 20,39" fill="#7c8b99"/>
+        <polygon points="52,10 59,9 59,30 52,31" fill="#7c8b99"/>
+        <!-- fallen span -->
+        <polygon points="66,32 96,44 93,50 66,38" fill="#5b6b7a"/>
+        <polygon points="93,50 96,44 100,58 96,64" fill="#46545f"/>
+        <!-- explosion -->
+        <polygon points="72,16 76,24 84,22 79,29 85,35 76,35 73,43 69,35 61,35 67,29 62,22 70,24" fill="#f39c2c"/>
+        <polygon points="72,22 75,27 80,27 76,31 78,36 73,33 68,36 70,31 66,27 71,27" fill="#ffd94d"/>
+        <!-- splash -->
+        <path d="M88 66 q4 -7 8 0 M98 68 q4 -6 7 0" stroke="#dff2ff" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="tag" style="background:#2e5fa3">UKRAINE · WAR</span>
+      <h3>KERCH BRIDGE HIT AGAIN</h3>
+      <p>A second day of strikes drops part of the road span into the strait. Putin not ready for peace talks.</p>
+    </article>
+
+    <article class="panel">
+      <svg class="icon" width="112" height="80" viewBox="0 0 120 84">
+        <!-- ballot paper -->
+        <polygon points="52,2 76,8 76,30 52,24" fill="#ffffff" stroke="#c9ced6"/>
+        <polygon points="57,9 71,12.4 71,16 57,12.6" fill="#2e5fa3"/>
+        <polygon points="57,18 67,20.4 67,23.4 57,21" fill="#9fb4cc"/>
+        <!-- ballot box, isometric -->
+        <polygon points="30,44 66,34 102,44 66,54" fill="#e8b64c"/>
+        <polygon points="30,44 66,54 66,78 30,68" fill="#c9932f"/>
+        <polygon points="66,54 102,44 102,68 66,78" fill="#a87824"/>
+        <polygon points="54,46.2 78,46.2 73,48.8 59,48.8" fill="#43300d"/>
+        <!-- star on front face -->
+        <polygon points="84,54 86.2,59.4 92,59.6 87.6,63 89.1,68.6 84,65.6 78.9,68.6 80.4,63 76,59.6 81.8,59.4" fill="#fff3d6"/>
+      </svg>
+      <span class="tag" style="background:#2e3a6e">U.S. · SENATE</span>
+      <h3>PELTOLA FLIPS ALASKA</h3>
+      <p>Democrat Mary Peltola defeats Republican incumbent Dan Sullivan — a projected 56–44 Senate majority for Democrats.</p>
+    </article>
+  </div>
+
+  <div class="row r2">
+    <article class="panel">
+      <svg class="icon" width="128" height="88" viewBox="0 0 130 88">
+        <!-- Africa silhouette -->
+        <path d="M86 8 L102 6 L111 14 L108 24 L113 33 L106 43 L102 58 L95 74 L88 61 L83 47 L77 35 L79 19 Z" fill="#3e8e4f"/>
+        <path d="M86 8 L102 6 L111 14 L108 24 L100 22 L92 16 Z" fill="#57ab68"/>
+        <!-- virus -->
+        <g stroke="#c2436b" stroke-width="4" stroke-linecap="round">
+          <line x1="38" y1="44" x2="38" y2="22"/><line x1="38" y1="44" x2="54" y2="30"/>
+          <line x1="38" y1="44" x2="58" y2="46"/><line x1="38" y1="44" x2="52" y2="60"/>
+          <line x1="38" y1="44" x2="38" y2="66"/><line x1="38" y1="44" x2="22" y2="58"/>
+          <line x1="38" y1="44" x2="18" y2="44"/><line x1="38" y1="44" x2="23" y2="29"/>
+        </g>
+        <g fill="#c2436b">
+          <circle cx="38" cy="19" r="4.4"/><circle cx="56" cy="28" r="4.4"/><circle cx="61" cy="46" r="4.4"/>
+          <circle cx="54" cy="62" r="4.4"/><circle cx="38" cy="69" r="4.4"/><circle cx="20" cy="60" r="4.4"/>
+          <circle cx="15" cy="44" r="4.4"/><circle cx="21" cy="27" r="4.4"/>
+        </g>
+        <circle cx="38" cy="44" r="17" fill="#e0567f"/>
+        <circle cx="32" cy="38" r="6" fill="#f08aa5"/>
+        <circle cx="44" cy="50" r="4.4" fill="#c2436b"/>
+        <circle cx="30" cy="52" r="3.4" fill="#c2436b"/>
+      </svg>
+      <span class="tag" style="background:#a02c4e">HEALTH · DR CONGO</span>
+      <h3>EBOLA DOUBLES IN DR CONGO</h3>
+      <p>Over 11,000 cases and 5,400 deaths in three months, says the UN — more than doubled. Children under five hit hardest.</p>
+    </article>
+
+    <article class="panel">
+      <svg class="icon" width="128" height="88" viewBox="0 0 130 88">
+        <!-- cyclone spiral -->
+        <path d="M34 46 a6 6 0 0 1 6 -6 a11 11 0 0 1 11 11 a17 17 0 0 1 -17 17 a24 24 0 0 1 -24 -24 a31 31 0 0 1 31 -31 a38 38 0 0 1 38 38"
+              fill="none" stroke="#2e7fb8" stroke-width="7" stroke-linecap="round"/>
+        <path d="M34 46 a6 6 0 0 1 6 -6 a11 11 0 0 1 11 11 a17 17 0 0 1 -17 17"
+              fill="none" stroke="#7cc3ea" stroke-width="7" stroke-linecap="round"/>
+        <!-- jet silhouette, top view -->
+        <polygon points="104,6 110,22 124,28 110,30 106,42 101,30 88,28 101,22" fill="#37424f"/>
+        <!-- rain -->
+        <g stroke="#57a7d8" stroke-width="3" stroke-linecap="round">
+          <line x1="92" y1="56" x2="88" y2="64"/><line x1="104" y1="58" x2="100" y2="66"/><line x1="116" y1="56" x2="112" y2="64"/>
+        </g>
+      </svg>
+      <span class="tag" style="background:#0f766e">DISASTERS</span>
+      <h3>19 DIE IN SIBERIA PLANE CRASH</h3>
+      <p>Russian military plane crashes in Kemerovo. Category 5 Cyclone Xavier slams the Cook Islands; 6.0 quake in Papua New Guinea.</p>
+    </article>
+  </div>
+
+  <footer class="ticker">
+    <span class="also">ALSO TODAY</span> — STOCKS FALL AGAIN, GOLD SLIDES TO $3,775 <span class="dot">•</span> KNESSET ELECTS KAHANA SPEAKER <span class="dot">•</span> PEACE BOARD: ISRAEL &amp; HAMAS FAILING COMMITMENTS <span class="dot">•</span> COLD KILLS DISPLACED PEOPLE IN GAZA'S TENTS
+  </footer>
+
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+try { init(); } catch (e) { console.error(e); window.__sceneError = String(e); window.__sceneReady = true; }
+
+function init() {
+  const art = document.getElementById('heroArt');
+  const canvas = document.getElementById('gl');
+  const W = art.clientWidth, H = art.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(2);
+  renderer.setSize(W, H, false);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a2c44);
+
+  const aspect = W / H;
+  const viewSize = 15.4;                       // ortho frustum height (world units)
+  const camera = new THREE.OrthographicCamera(
+    -viewSize * aspect / 2, viewSize * aspect / 2, viewSize / 2, -viewSize / 2, 0.1, 200);
+  camera.position.set(17, 15.5, 17);
+  camera.lookAt(0, 0.2, 0);
+
+  /* lights */
+  scene.add(new THREE.HemisphereLight(0xd6ecff, 0x20303c, 0.95));
+  const sun = new THREE.DirectionalLight(0xfff1d6, 2.0);
+  sun.position.set(11, 22, 7);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -19; sun.shadow.camera.right = 19;
+  sun.shadow.camera.top = 19; sun.shadow.camera.bottom = -19;
+  sun.shadow.camera.far = 70;
+  sun.shadow.bias = -0.0006;
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x9fd0ff, 0.5);
+  fill.position.set(-14, 10, -8);
+  scene.add(fill);
+
+  /* water — glossy plane with a painted depth gradient */
+  const wc = document.createElement('canvas'); wc.width = wc.height = 512;
+  const g = wc.getContext('2d');
+  const grad = g.createRadialGradient(235, 215, 40, 256, 256, 360);
+  grad.addColorStop(0, '#1b7d9d'); grad.addColorStop(0.55, '#11607f'); grad.addColorStop(1, '#082f47');
+  g.fillStyle = grad; g.fillRect(0, 0, 512, 512);
+  const waterTex = new THREE.CanvasTexture(wc);
+  waterTex.colorSpace = THREE.SRGBColorSpace;
+  const water = new THREE.Mesh(
+    new THREE.PlaneGeometry(90, 90),
+    new THREE.MeshStandardMaterial({ map: waterTex, roughness: 0.32, metalness: 0.08 }));
+  water.rotation.x = -Math.PI / 2;
+  water.position.y = 0.35;
+  water.receiveShadow = true;
+  scene.add(water);
+
+  /* land — extruded stylised coastline blocks (shape +y = north) */
+  const sandTop = new THREE.MeshStandardMaterial({ color: 0xdcbc7d, roughness: 0.95 });
+  const sandSide = new THREE.MeshStandardMaterial({ color: 0x7d5c33, roughness: 1 });
+  const rockTop = new THREE.MeshStandardMaterial({ color: 0xcbb27f, roughness: 0.95 });
+  function land(points, topMat) {
+    const shape = new THREE.Shape();
+    shape.moveTo(points[0][0], points[0][1]);
+    for (let i = 1; i < points.length; i++) shape.lineTo(points[i][0], points[i][1]);
+    shape.closePath();
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: 0.9, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.1, bevelSegments: 1 });
+    const mesh = new THREE.Mesh(geo, [topMat, sandSide]);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    scene.add(mesh);
+    return mesh;
+  }
+  // IRAN — northern shore
+  land([[-15, 9], [-15, 2.2], [-7, 3.2], [-2, 2.4], [2.5, 3.0], [6, 2.2], [9.5, 3.4], [15, 2.6], [15, 9]], sandTop);
+  // ARABIA — southern shore, with the Qatar bump
+  land([[-15, -9], [-15, -1.2], [-11, -0.9], [-8, -0.6], [-6.2, -1.5], [-4.5, -1.2], [-2, -0.3],
+        [0.5, -1.3], [3, -1.2], [3.6, -1.0], [4.3, 0.9], [5.7, 1.0], [6.3, -0.8], [9, -1.5], [15, -0.9], [15, -9]], rockTop);
+  // BAHRAIN — island mesa off the Arabian coast
+  const bahrain = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.15, 0.9, 24),
+    [sandSide, sandTop, sandSide]);
+  bahrain.position.set(-5.6, 0.45, 0.1);
+  bahrain.castShadow = true; bahrain.receiveShadow = true;
+  scene.add(bahrain);
+  // QESHM ISLAND — long island hugging Iran's coast in the strait
+  const qeshm = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.12, 0.9, 24),
+    [sandSide, sandTop, sandSide]);
+  qeshm.scale.set(2.3, 1, 0.75);
+  qeshm.position.set(8.6, 0.45, -2.0);
+  qeshm.castShadow = true; qeshm.receiveShadow = true;
+  scene.add(qeshm);
+
+  /* U.S. air base on Bahrain: runway, hangars, tower */
+  const base = new THREE.Group();
+  const concrete = new THREE.MeshStandardMaterial({ color: 0x9aa3ab, roughness: 0.9 });
+  const darkMetal = new THREE.MeshStandardMaterial({ color: 0x3c4650, roughness: 0.6, metalness: 0.3 });
+  const runway = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.07, 0.42), darkMetal);
+  runway.position.y = 0.94; base.add(runway);
+  const hangar1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.26, 0.4), concrete);
+  hangar1.position.set(-0.45, 1.03, -0.42); base.add(hangar1);
+  const hangar2 = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.22, 0.36), concrete);
+  hangar2.position.set(0.35, 1.01, -0.45); base.add(hangar2);
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.55, 10), concrete);
+  tower.position.set(0.72, 1.18, 0.3); base.add(tower);
+  base.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  base.position.set(-5.6, 0, 0.1);
+  scene.add(base);
+
+  /* explosion cluster (basic materials = pure glow colour) */
+  function explosion(x, y, z, s) {
+    const grp = new THREE.Group();
+    const core = new THREE.Mesh(new THREE.SphereGeometry(0.55, 18, 14),
+      new THREE.MeshBasicMaterial({ color: 0xff7b1c }));
+    grp.add(core);
+    const mid = new THREE.Mesh(new THREE.SphereGeometry(0.36, 16, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffb03a }));
+    mid.position.set(0.25, 0.3, 0.1); grp.add(mid);
+    const hot = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10),
+      new THREE.MeshBasicMaterial({ color: 0xffe9a8 }));
+    hot.position.set(-0.12, 0.42, -0.08); grp.add(hot);
+    const halo = new THREE.Mesh(new THREE.SphereGeometry(0.8, 18, 14),
+      new THREE.MeshBasicMaterial({ color: 0xff8c3a, transparent: true, opacity: 0.16 }));
+    grp.add(halo);
+    const light = new THREE.PointLight(0xff8c3a, 55, 13, 1.8);
+    light.position.y = 0.7; grp.add(light);
+    grp.position.set(x, y, z); grp.scale.setScalar(s);
+    scene.add(grp);
+  }
+  explosion(-5.6, 1.35, 0.1, 0.9);          // Bahrain base hit
+  explosion(-9.3, 1.15, 0.9, 0.55);         // Kuwait coast hit
+
+  /* target rings */
+  function ring(x, z, r, color) {
+    const m = new THREE.Mesh(new THREE.RingGeometry(r, r + 0.17, 48),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
+    m.rotation.x = -Math.PI / 2; m.position.set(x, 0.97, z);
+    scene.add(m);
+  }
+  ring(-5.6, 0.1, 1.25, 0xff4b3e);
+  ring(-9.3, 0.9, 0.8, 0xff4b3e);
+
+  /* glowing trajectory tubes */
+  function trajectory(pts, color) {
+    const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
+    const glow = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.15, 8),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.22 }));
+    const core = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.055, 8),
+      new THREE.MeshBasicMaterial({ color }));
+    scene.add(glow); scene.add(core);
+    return curve;
+  }
+  const t1 = trajectory([[-1, 0.9, -2.6], [-3.2, 4.6, -1.2], [-5.6, 1.5, 0.1]], 0xffa726);
+  const t2 = trajectory([[3.2, 0.9, -2.6], [-0.5, 5.0, -1.0], [-4.5, 3.6, 0.6], [-9.3, 1.5, 0.9]], 0xff7043);
+  const t3 = trajectory([[-3.5, 0.9, -2.8], [-4.2, 4.4, 0.8], [-5.2, 2.7, 3.6]], 0xff5252);
+
+  /* interception burst at the end of the Riyadh-bound path */
+  const burst = new THREE.Group();
+  const bCore = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 12),
+    new THREE.MeshBasicMaterial({ color: 0xfff3b0 }));
+  burst.add(bCore);
+  for (let i = 0; i < 6; i++) {
+    const spike = new THREE.Mesh(new THREE.BoxGeometry(0.09, 1.15, 0.09),
+      new THREE.MeshBasicMaterial({ color: 0xffd54f }));
+    spike.rotation.z = i * Math.PI / 3;
+    spike.rotation.x = (i % 2) * 0.7;
+    burst.add(spike);
+  }
+  burst.position.set(-5.2, 2.7, 3.6);
+  scene.add(burst);
+
+  /* drones + missiles riding the arcs */
+  const droneMat = new THREE.MeshStandardMaterial({ color: 0x4a5560, roughness: 0.55, metalness: 0.35 });
+  function drone() {
+    const d = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, 0.85, 4, 10), droneMat);
+    body.rotation.x = Math.PI / 2; d.add(body);
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.045, 0.3), droneMat);
+    wing.position.z = -0.05; d.add(wing);
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.04, 0.22), droneMat);
+    tail.position.z = -0.62; d.add(tail);
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.3, 0.2), droneMat);
+    fin.position.set(0, -0.12, -0.62); d.add(fin);
+    d.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    return d;
+  }
+  function missile() {
+    const m = new THREE.Group();
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe8e4da, roughness: 0.4, metalness: 0.2 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.85, 10), bodyMat);
+    body.rotation.x = Math.PI / 2; m.add(body);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.3, 10),
+      new THREE.MeshStandardMaterial({ color: 0xd43a2c, roughness: 0.5 }));
+    tip.rotation.x = Math.PI / 2; tip.position.z = 0.57; m.add(tip);
+    const flame = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.34, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffa726 }));
+    flame.rotation.x = -Math.PI / 2; flame.position.z = -0.58; m.add(flame);
+    m.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    return m;
+  }
+  function ride(obj, curve, t) {
+    const p = curve.getPoint(t), tan = curve.getTangent(t);
+    obj.position.copy(p);
+    obj.lookAt(p.clone().add(tan));
+    scene.add(obj);
+  }
+  ride(drone(), t1, 0.38);
+  ride(drone(), t1, 0.62);
+  ride(missile(), t2, 0.5);
+  ride(missile(), t3, 0.6);
+
+  /* downed MQ-9 near the strait, smoke trail curling down to the water */
+  const wreck = drone();
+  wreck.position.set(7.4, 1.7, -0.7);
+  wreck.rotation.set(0.9, 0.4, 0.5);
+  scene.add(wreck);
+  const smokeMat = new THREE.MeshBasicMaterial({ color: 0x9fb2bd, transparent: true, opacity: 0.4 });
+  [[7.9, 2.5, -1.1, 0.22], [8.4, 3.3, -1.5, 0.34], [8.9, 4.2, -1.9, 0.48]].forEach(([x, y, z, r]) => {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), smokeMat);
+    s.position.set(x, y, z); scene.add(s);
+  });
+  const splash = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.62, 32),
+    new THREE.MeshBasicMaterial({ color: 0xcfeaff, transparent: true, opacity: 0.75, side: THREE.DoubleSide }));
+  splash.rotation.x = -Math.PI / 2; splash.position.set(7.3, 0.37, -0.55);
+  scene.add(splash);
+
+  /* a tanker threading the strait */
+  const tanker = new THREE.Group();
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.34, 0.62),
+    new THREE.MeshStandardMaterial({ color: 0x7e2f26, roughness: 0.7 }));
+  hull.position.y = 0.18; tanker.add(hull);
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.16, 0.44),
+    new THREE.MeshStandardMaterial({ color: 0xb9b0a0, roughness: 0.8 }));
+  deck.position.set(-0.2, 0.42, 0); tanker.add(deck);
+  const bridgeT = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.42, 0.5),
+    new THREE.MeshStandardMaterial({ color: 0xe9e4d8, roughness: 0.8 }));
+  bridgeT.position.set(1.0, 0.55, 0); tanker.add(bridgeT);
+  tanker.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  tanker.position.set(11.2, 0.35, 0.8);
+  tanker.rotation.y = 0.5;
+  tanker.scale.setScalar(1.25);
+  scene.add(tanker);
+
+  /* render a few frames so shadows settle, then flag readiness */
+  let frames = 0;
+  renderer.setAnimationLoop(() => {
+    renderer.render(scene, camera);
+    if (++frames >= 4) {
+      renderer.setAnimationLoop(null);
+      window.__sceneReady = true;
+    }
+  });
+}
+</script>
+</body>
+</html>
