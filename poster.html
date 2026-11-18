@@ -42,12 +42,17 @@
     position: relative; height: 250px; overflow: hidden;
     background: linear-gradient(180deg, #7e97a9 0%, #d9b98c 52%, #2c4a5e 100%);
   }
-  .hero-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+    filter: blur(0.5px) saturate(1.04) contrast(1.01); }
+  .hero-art .grain {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    opacity: .38; mix-blend-mode: overlay; background-repeat: repeat;
+  }
   .hero-art .grade {
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background:
       linear-gradient(180deg, rgba(255,176,102,.10) 0%, rgba(255,176,102,0) 34%),
-      radial-gradient(125% 95% at 50% 42%, rgba(0,0,0,0) 56%, rgba(10,16,24,.30) 100%);
+      radial-gradient(125% 95% at 50% 42%, rgba(0,0,0,0) 54%, rgba(10,16,24,.36) 100%);
   }
   .hero-art svg.leaders { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
   .chip {
@@ -122,6 +127,7 @@
   <section class="hero">
     <div class="hero-art" id="heroArt">
       <canvas id="gl"></canvas>
+      <div class="grain" id="grain"></div>
       <div class="grade"></div>
       <svg class="leaders" viewBox="0 0 966 250" preserveAspectRatio="none" aria-hidden="true">
         <g stroke="#ffffff" stroke-width="1.5" opacity="0.85">
@@ -362,8 +368,9 @@ function init() {
     skyTex.colorSpace = THREE.SRGBColorSpace;
     scene.background = skyTex;
   }
-  /* warm haze: distant shores melt into the horizon light */
-  scene.fog = new THREE.Fog(0xd9b48e, 55, 115);
+  /* atmospheric perspective: a cooler, nearer haze, so the far shore
+     melts toward the horizon light while the near shore stays warm */
+  scene.fog = new THREE.Fog(0xc6bba6, 34, 100);
 
   /* image-based ambience: a tiny equirect of the same sky, PMREM-blurred,
      so water and hull paint pick up believable sky reflections */
@@ -400,7 +407,7 @@ function init() {
      cool sky fill from the camera side, long golden-hour shadows */
   scene.add(new THREE.HemisphereLight(0x9db8cc, 0x4a4238, 1.1));
   const sun = new THREE.DirectionalLight(0xffb36b, 1.25);
-  sun.position.set(-16, 12, -10);
+  sun.position.set(-18, 9.5, -11);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.left = -20; sun.shadow.camera.right = 20;
@@ -412,6 +419,24 @@ function init() {
   const fill = new THREE.DirectionalLight(0x7d94b0, 0.4);
   fill.position.set(14, 9, 16);
   scene.add(fill);
+
+  /* sensor grain over the hero only: a seeded mid-grey noise tile in
+     overlay blend, so the render carries the fine texture of a real
+     camera sensor while the typeset poster around it stays clean.
+     Seeded, so every render is byte-identical. */
+  {
+    const gc = document.createElement('canvas'); gc.width = gc.height = 256;
+    const gg = gc.getContext('2d');
+    const img = gg.createImageData(256, 256);
+    const grng = mulberry32(112358);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = 116 + Math.floor(grng() * 80);
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+      img.data[i + 3] = 255;
+    }
+    gg.putImageData(img, 0, 0);
+    document.getElementById('grain').style.backgroundImage = `url(${gc.toDataURL()})`;
+  }
 
   /* soft radial glow texture for fire / explosion sprites */
   function glowTexture(inner, outer) {
@@ -491,18 +516,35 @@ function init() {
   waterTex.wrapS = waterTex.wrapT = THREE.RepeatWrapping;
   waterTex.repeat.set(3, 3);
 
-  /* normal map from an analytic wave heightfield (tileable sines) */
+  /* normal map from a tileable value-noise heightfield: organic chop
+     (analytic sines read as a repeating pattern) that shatters the
+     sun's reflection into broken sparkle instead of a smooth sheen */
+  function hash2(ix, iy, seed) {
+    let h = (Math.imul(ix, 374761393) + Math.imul(iy, 668265263) + Math.imul(seed, 974634211)) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+  function vnoise(u, v, period, seed) {
+    const x = u * period, y = v * period;
+    const ix = Math.floor(x), iy = Math.floor(y);
+    const fx = x - ix, fy = y - iy;
+    const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    const w = (a, b) => hash2(((a % period) + period) % period, ((b % period) + period) % period, seed);
+    const top = w(ix, iy) + (w(ix + 1, iy) - w(ix, iy)) * sx;
+    const bot = w(ix, iy + 1) + (w(ix + 1, iy + 1) - w(ix, iy + 1)) * sx;
+    return top + (bot - top) * sy;
+  }
   function waveHeight(u, v) {
-    return Math.sin(u * 31.0 + Math.sin(v * 19.0) * 1.7) * 0.5
-         + Math.sin(v * 43.0 + Math.sin(u * 14.0) * 1.3) * 0.32
-         + Math.sin((u + v) * 67.0) * 0.18
-         + Math.sin((u * 53.0 - v * 29.0) + Math.sin(u * 23.0) * 1.1) * 0.12;
+    return vnoise(u, v, 6, 11) * 0.55
+         + vnoise(u, v, 13, 23) * 0.30
+         + vnoise(u, v, 27, 37) * 0.15
+         + Math.sin((u * 4.0 + v * 10.0) * Math.PI * 2) * 0.05;
   }
   const nc = document.createElement('canvas'); nc.width = nc.height = 256;
   {
     const g2 = nc.getContext('2d');
     const img = g2.createImageData(256, 256);
-    const S = 0.55, E = 1 / 256;
+    const S = 0.72, E = 1 / 256;
     for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
       const u = x / 256, v = y / 256;
       const dx = (waveHeight(u + E, v) - waveHeight(u - E, v)) * S;
@@ -536,23 +578,78 @@ function init() {
   const water = new THREE.Mesh(new THREE.PlaneGeometry(90, 90),
     new THREE.MeshStandardMaterial({
       map: waterTex, color: 0xffffff,
-      normalMap: waterNrm, normalScale: new THREE.Vector2(0.2, 0.2),
-      roughness: 1.0, metalness: 0.0, envMapIntensity: 0.42 }));
+      normalMap: waterNrm, normalScale: new THREE.Vector2(0.32, 0.32),
+      roughness: 1.0, metalness: 0.0, envMapIntensity: 0.5 }));
   water.rotation.x = -Math.PI / 2;
   water.position.y = 0.35;
   water.receiveShadow = true;
   scene.add(water);
 
-  /* sun glint: a soft warm sheen laid along the strait, the way a low
-     sun smears across real water in an aerial photograph */
+  /* broad water colour, painted in world coordinates: turquoise
+     shallows hugging both shores and ringing the islands, deep blue
+     down the channel — the colour geography of a real strait */
   {
-    const glintTex = glowTexture('rgba(255,190,110,0.9)', 'rgba(255,150,60,0)');
-    const glint = new THREE.Mesh(new THREE.PlaneGeometry(30, 8),
-      new THREE.MeshBasicMaterial({ map: glintTex, transparent: true, opacity: 0.34,
+    const tc = document.createElement('canvas'); tc.width = tc.height = 1024;
+    const tg = tc.getContext('2d');
+    const px = (x, z) => [(x + 24) / 48 * 1024, (z + 24) / 48 * 1024];
+    const blob = (x, z, rWorld, rgb, a) => {
+      const [cx, cy] = px(x, z);
+      const r = rWorld / 48 * 1024;
+      const gr = tg.createRadialGradient(cx, cy, 0, cx, cy, r);
+      gr.addColorStop(0, `rgba(${rgb},${a})`);
+      gr.addColorStop(1, `rgba(${rgb},0)`);
+      tg.fillStyle = gr;
+      tg.beginPath(); tg.arc(cx, cy, r, 0, 7); tg.fill();
+    };
+    for (let x = -22; x <= 22; x += 3.2) {          // the deep channel
+      blob(x, -0.6, 5.2, '8,44,86', 0.20);
+      blob(x, -3.4, 3.4, '52,158,158', 0.16);        // Iran-side shallows
+      blob(x, 2.6, 3.4, '56,164,158', 0.16);         // Arabia-side shallows
+    }
+    blob(-5.6, 0.1, 3.0, '64,178,164', 0.22);        // Bahrain shallows
+    blob(6.4, -2.0, 2.6, '64,178,164', 0.20);        // Qeshm shallows
+    blob(8.6, -2.0, 2.6, '64,178,164', 0.20);
+    blob(10.8, -2.0, 2.6, '64,178,164', 0.20);
+    const tintTex = new THREE.CanvasTexture(tc);
+    tintTex.colorSpace = THREE.SRGBColorSpace;
+    const tintGeo = new THREE.PlaneGeometry(48, 48);
+    tintGeo.rotateX(-Math.PI / 2);
+    const tint = new THREE.Mesh(tintGeo, new THREE.MeshBasicMaterial({
+      map: tintTex, transparent: true, depthWrite: false }));
+    tint.position.y = 0.362;
+    tint.renderOrder = 1;
+    scene.add(tint);
+  }
+
+  /* sun glint: a warm sheen laid along the strait, but punched full of
+     sparkle holes so the wave chop breaks it up — a real glint path
+     glitters, it does not smear */
+  {
+    const gc2 = document.createElement('canvas'); gc2.width = 256; gc2.height = 128;
+    const gg2 = gc2.getContext('2d');
+    const grd = gg2.createRadialGradient(128, 64, 4, 128, 64, 122);
+    grd.addColorStop(0, 'rgba(255,196,118,0.95)');
+    grd.addColorStop(1, 'rgba(255,150,60,0)');
+    gg2.fillStyle = grd; gg2.fillRect(0, 0, 256, 128);
+    gg2.globalCompositeOperation = 'destination-out';
+    const grng2 = mulberry32(60606);
+    for (let i = 0; i < 300; i++) {
+      const x = grng2() * 256, y = grng2() * 128, r = 1.5 + grng2() * 9;
+      const hole = gg2.createRadialGradient(x, y, 0, x, y, r);
+      hole.addColorStop(0, `rgba(0,0,0,${0.3 + grng2() * 0.5})`);
+      hole.addColorStop(1, 'rgba(0,0,0,0)');
+      gg2.fillStyle = hole;
+      gg2.beginPath(); gg2.arc(x, y, r, 0, 7); gg2.fill();
+    }
+    const glintTex = new THREE.CanvasTexture(gc2);
+    glintTex.colorSpace = THREE.SRGBColorSpace;
+    const glint = new THREE.Mesh(new THREE.PlaneGeometry(27, 7),
+      new THREE.MeshBasicMaterial({ map: glintTex, transparent: true, opacity: 0.3,
         blending: THREE.AdditiveBlending, depthWrite: false }));
     glint.rotation.x = -Math.PI / 2;
     glint.rotation.z = -0.32;
     glint.position.set(2.0, 0.375, -0.5);
+    glint.renderOrder = 2;
     scene.add(glint);
   }
 
@@ -566,7 +663,7 @@ function init() {
       const t = rng();                                   // 0 tail → 1 stern
       const spread = 3 + Math.pow(t, 1.6) * 46;
       const y = 64 + (rng() * 2 - 1) * spread;
-      const a = 0.05 + t * 0.5 * rng();
+      const a = 0.05 + Math.pow(t, 1.5) * 0.62 * rng();
       g.fillStyle = `rgba(238,248,255,${a})`;
       g.fillRect(t * 250, y, 2 + rng() * 7, 1.4);
     }
@@ -592,6 +689,7 @@ function init() {
     m.position.copy(stern).addScaledVector(fwd, -len / 2 + 0.4);
     m.position.y = 0.385;
     m.rotation.y = ry;
+    m.renderOrder = 3;
     scene.add(m);
     return m;
   }
@@ -753,10 +851,15 @@ function init() {
     core.position.y = 0.15; grp.add(core);
     const light = new THREE.PointLight(0xff8c3a, 55, 13, 1.8);
     light.position.y = 0.7; grp.add(light);
-    [[0, 0.75, 0, 1.5, 1.15, 0x35322e, 0.82],
-     [-0.25, 1.45, -0.1, 2.1, 1.6, 0x5c574f, 0.64],
-     [-0.55, 2.2, -0.2, 2.8, 2.1, 0x8a8478, 0.46]].forEach(([px, py, pz, sx, sy, col, op], i) => {
-      const sp = smokeSprite(i === 0 ? smokeDarkTex : smokeLiteTex, col, sx, sy, op, i * 1.1);
+    /* the column sheers with the altitude wind — the same +x / -z
+       drift as the MQ-9's trail — thinning, stretching sideways and
+       cooling in colour as it climbs */
+    [[0, 0.7, 0, 1.4, 1.1, 0x2e2b27, 0.85],
+     [0.22, 1.3, -0.06, 1.9, 1.45, 0x4c4741, 0.68],
+     [0.5, 1.95, -0.12, 2.5, 1.8, 0x6e685f, 0.52],
+     [0.85, 2.6, -0.18, 3.3, 2.2, 0x8f897e, 0.38],
+     [1.3, 3.25, -0.24, 4.3, 2.6, 0xa8a294, 0.26]].forEach(([px, py, pz, sx, sy, col, op], i) => {
+      const sp = smokeSprite(i === 0 ? smokeDarkTex : smokeLiteTex, col, sx, sy, op, i * 0.9);
       sp.position.set(px, py, pz); grp.add(sp);
     });
     grp.position.set(x, y, z); grp.scale.setScalar(s);
@@ -858,8 +961,8 @@ function init() {
   wreck.rotation.set(0.9, 0.4, 0.5);
   scene.add(wreck);
   [[7.8, 2.4, -1.05, 0.85, 0.62, 0x707880, 0.55],
-   [8.3, 3.2, -1.45, 1.15, 0.85, 0x8b959c, 0.45],
-   [8.85, 4.1, -1.85, 1.5, 1.1, 0xa8b2b8, 0.34]].forEach(([x, y, z, sx, sy, col, op], i) => {
+   [8.3, 3.2, -1.45, 1.2, 0.85, 0x8b959c, 0.42],
+   [8.9, 4.1, -1.85, 1.95, 1.15, 0xa8b2b8, 0.30]].forEach(([x, y, z, sx, sy, col, op], i) => {
     const s = smokeSprite(smokeLiteTex, col, sx, sy, op, i * 1.3);
     s.position.set(x, y, z); scene.add(s);
   });
